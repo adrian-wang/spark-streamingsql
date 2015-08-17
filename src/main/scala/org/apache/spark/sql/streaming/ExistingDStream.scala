@@ -17,13 +17,11 @@
 
 package org.apache.spark.sql.streaming
 
-import org.apache.spark.rdd.{RDD, EmptyRDD}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.analysis.MultiInstanceRelation
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.plans.logical.{Statistics, LogicalPlan}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
 
 /** A LogicalPlan wrapper of row based DStream. */

@@ -18,12 +18,11 @@
 package org.apache.spark.sql.streaming
 
 import org.apache.spark.rdd.{EmptyRDD, RDD}
-import org.apache.spark.sql.catalyst.expressions.{Attribute, Row}
+import org.apache.spark.sql.catalyst.expressions.Row
 import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.{UnaryNode, SparkPlan, RDDConversions}
-import org.apache.spark.sql.streaming.DStreamHelper._
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.streaming.{Time, Duration}
+import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
 
 private[this] object SparkShim {
@@ -49,8 +48,8 @@ private[this] object SparkShim {
 
 trait WindowTrait extends StreamPlan {
   self: UnaryNode =>
+  import DStreamHelper._
   override def execute() = {
-    import DStreamHelper._
     assert(validTime != null)
     Utils.invoke(classOf[DStream[Row]], stream, "getOrCompute", (classOf[Time], validTime))
       .asInstanceOf[Option[RDD[Row]]]

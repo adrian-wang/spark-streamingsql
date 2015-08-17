@@ -17,7 +17,7 @@
 
 package org.apache.spark.sql.streaming
 
-import org.apache.spark.rdd.{EmptyRDD, RDD}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.plans.logical
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
@@ -44,20 +44,20 @@ private[streaming] case class WindowedPhysicalPlan(
 
   @transient private val wrappedStream =
     new DStream[Row](streamSqlContext.streamingContext) {
-      override def dependencies = parentStreams.toList
-      override def slideDuration: Duration = parentStreams.head.slideDuration
-      override def compute(validTime: Time): Option[RDD[Row]] = Some(child.execute())
+    override def dependencies = parentStreams.toList
+    override def slideDuration: Duration = parentStreams.head.slideDuration
+    override def compute(validTime: Time): Option[RDD[Row]] = Some(child.execute())
 
-      private lazy val parentStreams = {
-        def traverse(plan: SparkPlan): Seq[DStream[Row]] = plan match {
-          case x: StreamPlan => x.stream :: Nil
-          case _ => plan.children.flatMap(traverse(_))
-        }
-        val streams = traverse(child)
-        assert(!streams.isEmpty, s"Input query and related plan $child is not a stream plan")
-        streams
+    private lazy val parentStreams = {
+      def traverse(plan: SparkPlan): Seq[DStream[Row]] = plan match {
+        case x: StreamPlan => x.stream :: Nil
+        case _ => plan.children.flatMap(traverse(_))
       }
+      val streams = traverse(child)
+      assert(!streams.isEmpty, s"Input query and related plan $child is not a stream plan")
+      streams
     }
+  }
 
   @transient val stream = slideDuration.map(wrappedStream.window(windowDuration, _))
     .getOrElse(wrappedStream.window(windowDuration))
